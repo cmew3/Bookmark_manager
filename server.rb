@@ -1,4 +1,5 @@
 require 'data_mapper'
+require 'sinatra'
 
 env = ENV["RACK_ENV"] || "development"
 #We're telling datamapper to use a postgres database on localhost. The name will be "bookmark_manager_test"
@@ -13,3 +14,8 @@ DataMapper.finalize
 
 #Hoever, the database tables don't exist yet. We then tell the datamapper to create them
 DataMapper.auto_upgrade!
+
+get '/' do
+	@links =Link.all
+	erb :index
+end
