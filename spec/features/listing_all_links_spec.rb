@@ -30,3 +30,4 @@ feature 'User browses the list of links' do
 	end
 
 end
+
