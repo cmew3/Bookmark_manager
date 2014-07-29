@@ -20,7 +20,25 @@ enable :sessions
 set :session_secret, 'super secret'
 use Rack::Flash
 
+get '/users/reset_password' do
+	erb :reset_password
+end
 
+post '/reset_password' do
+	email = params[:email]
+	user = User.first(:email => email)
+	user.password_token = (1..15).map{("A".."Z").to_a.sample}.join
+	user.password_token_timestamp =Time.now
+	user.save
+	# user.email_link= request.url.to_s +"/:" + token.to_s
+	puts request.url.to_s + "/:" + user.password_token.to_s
+end
+
+get 'users/reset_password/:' do
+	token = params[:token]
+	user =User.first(:token => token)
+	
+end
 
 
 

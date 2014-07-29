@@ -14,7 +14,7 @@ class User
 	property :password_digest, Text
 
 	attr_reader :password
-	attr_accessor :password_confirmation
+	attr_accessor :password_confirmation, :password_token, :password_token_timestamp
 	validates_confirmation_of :password, :message => "Ooops...your passwords do not match!"
 
 	# when assigned the password, we don't store it directly
