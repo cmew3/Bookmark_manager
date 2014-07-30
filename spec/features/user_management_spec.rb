@@ -85,6 +85,14 @@ feature 'resetting passwords' do
 		expect(page).to have_content("A link to reset you password will be sent to your email shortly")
 	end
 
+	scenario 'when user has forgotten password but enters an invalid email' do
+		visit '/sessions/new'
+		click_link 'Forgotten password'
+		expect(page).to have_content("Please enter your email address")
+		fill_in_email('invalidemail@test.com')
+		expect(page).to have_content("Email not recognised")
+	end
+
 	before(:each) do
 		user = User.create(:email => "test2@test.com",
 					:password => "test2",

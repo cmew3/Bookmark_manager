@@ -53,8 +53,6 @@ class User
 		else
 			false
 		end
-
-
 	end
 
 end

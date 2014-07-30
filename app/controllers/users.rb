@@ -25,16 +25,20 @@ end
 
 post '/users/reset_password' do
 	email = params[:email]
-	user = User.first(:email => email)
-	user.set_reset_token
-	send_password_reset(user.email,create_link(user.password_token))
-	erb :'users/email_sent'
+	if user = User.first(:email => email)
+		user.set_reset_token
+		send_password_reset(user.email,create_link(user.password_token))
+		erb :'users/email_sent'
+	else
+		flash[:notice] = "Email not recognised"
+		redirect '/users/reset_password'
+	end
 end
 
 get '/users/reset_password/:token' do
 	token = params[:token]
 	@user = User.first(:password_token => token)
-	if (Time.now-@user.password_token_timestamp) < PASSWORD_RESET_TIMEOUT
+	if @user && (Time.now-@user.password_token_timestamp) < PASSWORD_RESET_TIMEOUT
 		erb :'users/new_password'
 	else
 		flash.now[:notice] = "Sorry your password reset has timed out"
@@ -44,10 +48,7 @@ end
 
 post '/users/set_new_password' do
 	@user = User.first(	:email =>params[:email])
-	if @user.update(:password => params[:password],
-				 :password_confirmation => params[:password_confirmation],
-				 :password_token => nil,
-				 :password_token_timestamp => nil)
+	if @user.reset_password(params[:password], params[:password_confirmation])
 	session[:user_id] = @user.id
 	redirect to('/')
 	else
