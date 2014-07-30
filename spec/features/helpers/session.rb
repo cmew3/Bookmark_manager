@@ -19,4 +19,17 @@ module SessionHelpers
 		click_button 'Sign in'
 	end
 
+	
+	def fill_in_email(email)
+		visit '/users/reset_password'
+		fill_in 'email', :with => email
+		click_button 'Reset password'
+	end
+
+	def fill_in_new_password(password, password_confirmation)
+		fill_in :password, :with => password
+		fill_in :password_confirmation, :with => password_confirmation
+		click_button "Submit password"
+	end
+
 end

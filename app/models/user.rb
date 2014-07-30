@@ -31,6 +31,11 @@ class User
 		self.password_digest = BCrypt::Password.create(password)
 	end
 
+	def set_reset_token
+		update(password_token: (1..60).map{("A".."Z").to_a.sample}.join,
+		password_token_timestamp: Time.now)
+	end
+
 	def self.authenticate(email, password)
 		user = first(:email => email)
 		if user && BCrypt::Password.new(user.password_digest) == password
@@ -38,6 +43,18 @@ class User
 		else
 			nil
 		end
+	end
+
+	def reset_password(password,password_confirmation)	
+		if update(:password => password,
+				 :password_confirmation => password_confirmation)
+			update(:password_token => nil,
+				 :password_token_timestamp => nil)
+		else
+			false
+		end
+
+
 	end
 
 end

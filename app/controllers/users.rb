@@ -1,3 +1,5 @@
+PASSWORD_RESET_TIMEOUT = 60*60
+
 get '/users/new' do
 	@user = User.new
 	erb :'users/new'
@@ -24,22 +26,38 @@ end
 post '/users/reset_password' do
 	email = params[:email]
 	user = User.first(:email => email)
-	user.password_token = (1..60).map{("A".."Z").to_a.sample}.join
-	puts user.password_token
-	user.password_token_timestamp =Time.now
-	user.save
-	puts create_link user.password_token
+	user.set_reset_token
 	send_password_reset(user.email,create_link(user.password_token))
+	erb :'users/email_sent'
 end
 
 get '/users/reset_password/:token' do
 	token = params[:token]
 	@user = User.first(:password_token => token)
-	erb :'users/new_password'
+	if (Time.now-@user.password_token_timestamp) < PASSWORD_RESET_TIMEOUT
+		erb :'users/new_password'
+	else
+		flash.now[:notice] = "Sorry your password reset has timed out"
+		erb :'users/reset_password'
+	end
+end
+
+post '/users/set_new_password' do
+	@user = User.first(	:email =>params[:email])
+	if @user.update(:password => params[:password],
+				 :password_confirmation => params[:password_confirmation],
+				 :password_token => nil,
+				 :password_token_timestamp => nil)
+	session[:user_id] = @user.id
+	redirect to('/')
+	else
+		flash.now[:errors] = @user.errors.full_messages
+		erb :'users/new_password'
+	end
 end
 
 def create_link password_token
-	request.url.to_s + "/" + password_token.to_s
+	"#{request.url.to_s}/#{password_token.to_s}"
 end
 
 def send_password_reset(email, link)
@@ -52,15 +70,4 @@ def send_password_reset(email, link)
 end
 
 
-post '/users/set_new_password' do
-	@user = User.first(	:email =>params[:email])
-	if @user.update(:password => params[:password],
-				 :password_confirmation => params[:password_confirmation])
-	session[:user_id] = @user.id
-	redirect to('/')
-	else
-		flash.now[:errors] = @user.errors.full_messages
-		erb :'users/new_password'
-	end
-end
 

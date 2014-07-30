@@ -72,7 +72,7 @@ end
 feature 'resetting passwords' do
 
 	before(:each) do
-		User.create(:email => "test@test.com",
+		user = User.create(:email => "test@test.com",
 					:password => "test",
 					:password_confirmation => "test")
 	end
@@ -82,30 +82,42 @@ feature 'resetting passwords' do
 		click_link 'Forgotten password'
 		expect(page).to have_content("Please enter your email address")
 		fill_in_email('test@test.com')
+		expect(page).to have_content("A link to reset you password will be sent to your email shortly")
 	end
 
-	scenario 'when user follows the email link' do
-		user = User.create(:email => "test3432@test.com",
+	before(:each) do
+		user = User.create(:email => "test2@test.com",
 					:password => "test2",
 					:password_confirmation => "test2",  
-					:password_token => "ABCDEFGHIJKLMNO")
-	
+					:password_token => "ABCDEFGHIJKLMNO",
+					:password_token_timestamp => Time.now-60)
+	end
+
+	scenario 'when user follows the email link and enters valid password' do
 		visit '/users/reset_password/ABCDEFGHIJKLMNO'
 		expect(page).to have_content("please enter a new password")
 		fill_in_new_password("new_password","new_password")
-		
+		expect(page).to have_content("Welcome, test2@test.com")
+	end
+
+	scenario 'when user follows the email link and enters invalid password' do
+		visit '/users/reset_password/ABCDEFGHIJKLMNO'
+		expect(page).to have_content("please enter a new password")
+		fill_in_new_password("new_password","bad_password")
+		expect(page).to have_content("Ooops")
+	end
+
+	scenario 'does not reset the password if token has timed out' do
+		user = User.create(:email => "test3@test.com",
+					:password => "test3",
+					:password_confirmation => "test3",  
+					:password_token => "XYZABCDEFGHIJKLMNO",
+					:password_token_timestamp => Time.now-4000)
+		visit '/users/reset_password/XYZABCDEFGHIJKLMNO'
+		expect(page).not_to have_content("please enter a new password")
+		expect(page).to have_content("your password reset has timed out")
+
 	end
 
 end
 
-	def fill_in_email(email)
-		visit '/users/reset_password'
-		fill_in 'email', :with => email
-		click_button 'Reset password'
-	end
-
-	def fill_in_new_password(password, password_confirmation)
-		fill_in :password, :with => password
-		fill_in :password_confirmation, :with => password_confirmation
-		click_button "Submit password"
-	end
