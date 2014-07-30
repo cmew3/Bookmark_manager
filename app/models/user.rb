@@ -12,9 +12,11 @@ class User
 	# and it's not enough for the hash and salt
 
 	property :password_digest, Text
+	property :password_token, Text
+	property :password_token_timestamp, Time
 
 	attr_reader :password
-	attr_accessor :password_confirmation, :password_token, :password_token_timestamp
+	attr_accessor :password_confirmation
 	validates_confirmation_of :password, :message => "Ooops...your passwords do not match!"
 
 	# when assigned the password, we don't store it directly

@@ -4,5 +4,9 @@ env = ENV["RACK_ENV"] || "development"
 #By default postgres is configured to accept connections from a loggin in user without password and with default port so we omit them here
 DataMapper.setup(:default, "postgres://localhost/bookmark_manager_#{env}")
 
+require './app/models/user'
+  require './app/models/link'
+  require './app/models/tag'
 # After declaring your models, you should finalize them
 DataMapper.finalize
+DataMapper.auto_upgrade!

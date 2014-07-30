@@ -2,6 +2,8 @@ require 'data_mapper'
 require './app/data_mapper_setup'  
 
 task :auto_upgrade do  
+
+  
   # auto_upgrade makes non-destructive changes. 
   # If your tables don't exist, they will be created
   # but if they do and you changed your schema 
@@ -12,6 +14,7 @@ task :auto_upgrade do
 end
 
 task :auto_migrate do
+  
   # To force the creation of all tables as they are 
   # described in your models, even if this
   # may lead to data loss, use auto_migrate:

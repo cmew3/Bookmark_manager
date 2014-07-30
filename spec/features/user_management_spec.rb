@@ -84,6 +84,14 @@ feature 'resetting passwords' do
 		fill_in_email('test@test.com')
 	end
 
+	scenario 'when user follows the email link' do
+		user = User.create(:email => "test@test.com",
+					:password => "test",
+					:password_token => "ABCDEFGHIJKLMNO")
+		# create_link user.password_token
+
+	end
+
 end
 
 	def fill_in_email(email)
