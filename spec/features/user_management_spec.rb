@@ -85,11 +85,15 @@ feature 'resetting passwords' do
 	end
 
 	scenario 'when user follows the email link' do
-		user = User.create(:email => "test@test.com",
-					:password => "test",
+		user = User.create(:email => "test3432@test.com",
+					:password => "test2",
+					:password_confirmation => "test2",  
 					:password_token => "ABCDEFGHIJKLMNO")
-		# create_link user.password_token
-
+	
+		visit '/users/reset_password/ABCDEFGHIJKLMNO'
+		expect(page).to have_content("please enter a new password")
+		fill_in_new_password("new_password","new_password")
+		
 	end
 
 end
@@ -98,4 +102,10 @@ end
 		visit '/users/reset_password'
 		fill_in 'email', :with => email
 		click_button 'Reset password'
+	end
+
+	def fill_in_new_password(password, password_confirmation)
+		fill_in :password, :with => password
+		fill_in :password_confirmation, :with => password_confirmation
+		click_button "Submit password"
 	end
